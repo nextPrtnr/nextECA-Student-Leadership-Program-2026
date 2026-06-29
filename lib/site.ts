@@ -1,6 +1,5 @@
 // next ECA brand + program content.
-// TODO: Replace LOGO_URL with your official next ECA logo URL.
-export const LOGO_URL = ""
+export const LOGO_URL = "/nexteca-logo.png"
 
 export const SITE = {
   name: "next ECA",
