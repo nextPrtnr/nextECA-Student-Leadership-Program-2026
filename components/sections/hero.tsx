@@ -84,8 +84,8 @@ export function Hero() {
           <div className="relative overflow-hidden rounded-3xl border border-border shadow-xl">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/hero-boys-campus.jpg"
-              alt="University male students collaborating and working together on campus"
+              src="/hero-hackathon-berkeley.jpg"
+              alt="Students participating in a hackathon, collaborating on projects and competitions"
               className="h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-primary/30 to-transparent" />
