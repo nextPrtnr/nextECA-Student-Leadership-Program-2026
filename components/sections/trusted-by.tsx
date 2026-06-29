@@ -1,19 +1,21 @@
 import { Reveal } from "@/components/reveal"
 
-const PARTNERS: { name: string; logo?: string }[] = [
-  { name: "Cloud Camp BD", logo: "/partner-cloudcamp.webp" },
-  { name: "PhotoZone Graphy", logo: "/partner-photozone.png" },
-  { name: "Event Partner", logo: "/partner-logo3.png" },
+const PARTNERS: { name: string; logo?: string; isDark?: boolean }[] = [
+  { name: "Cloud Camp BD", logo: "/partner-cloudcamp.webp", isDark: true },
+  { name: "PhotoZone Graphy", logo: "/partner-photozone.png", isDark: false },
+  { name: "Event Partner", logo: "/partner-logo3.png", isDark: true },
 ]
 
-function PartnerItem({ partner }: { partner: { name: string; logo?: string } }) {
+function PartnerItem({ partner }: { partner: { name: string; logo?: string; isDark?: boolean } }) {
   return (
     <div
-      className="flex h-16 w-44 shrink-0 items-center justify-center rounded-xl border border-border bg-white px-6 grayscale opacity-70 transition-all duration-300 hover:opacity-100 hover:grayscale-0"
+      className={`flex h-20 w-56 shrink-0 items-center justify-center rounded-full border transition-all duration-300 hover:scale-105 ${
+        partner.isDark ? "border-gray-700 bg-gray-700" : "border-gray-200 bg-white"
+      }`}
     >
       {partner.logo ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={partner.logo} alt={partner.name} className="max-h-8 w-auto" />
+        <img src={partner.logo} alt={partner.name} className="max-h-10 w-auto px-6" />
       ) : (
         <span className="font-heading text-base font-bold text-muted-foreground">
           {partner.name}

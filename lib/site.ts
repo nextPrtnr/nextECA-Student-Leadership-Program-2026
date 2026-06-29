@@ -11,9 +11,9 @@ export const SITE = {
 
 export const SOCIALS = [
   { label: "Official Portal", href: "https://www.nexteca.club" },
-  { label: "GitHub", href: "https://github.com/nextECA" },
+  { label: "GitHub", href: "https://github.com/nextPrtnr/nextECA" },
   { label: "Facebook", href: "https://www.facebook.com/nextECA.org" },
   { label: "Instagram", href: "https://instagram.com/next_eca" },
   { label: "Community Group", href: "https://facebook.com/groups/nextECA" },
-  { label: "LinkedIn", href: "https://linkedin.com/company/nextecas" },
+  { label: "LinkedIn", href: "https://linkedin.com/company/nexteca" },
 ]
