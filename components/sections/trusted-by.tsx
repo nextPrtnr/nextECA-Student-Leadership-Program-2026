@@ -1,22 +1,19 @@
 import { Reveal } from "@/components/reveal"
 
-// TODO: Replace these placeholders with your real partner names + logo URLs.
-// To show an image logo, set `logo` to the image URL.
 const PARTNERS: { name: string; logo?: string }[] = [
-  { name: "Partner One" },
-  { name: "Partner Two" },
-  { name: "Partner Three" },
-  { name: "Partner Four" },
-  { name: "Partner Five" },
-  { name: "Partner Six" },
+  { name: "Cloud Camp BD", logo: "/partner-cloudcamp.webp" },
+  { name: "PhotoZone Graphy", logo: "/partner-photozone.png" },
+  { name: "Event Partner", logo: "/partner-logo3.png" },
 ]
 
 function PartnerItem({ partner }: { partner: { name: string; logo?: string } }) {
   return (
-    <div className="flex h-16 w-44 shrink-0 items-center justify-center rounded-xl border border-border bg-card px-6 grayscale opacity-70 transition-all duration-300 hover:opacity-100 hover:grayscale-0">
+    <div
+      className="flex h-16 w-44 shrink-0 items-center justify-center rounded-xl border border-border bg-white px-6 grayscale opacity-70 transition-all duration-300 hover:opacity-100 hover:grayscale-0"
+    >
       {partner.logo ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={partner.logo || "/placeholder.svg"} alt={partner.name} className="max-h-8 w-auto" />
+        <img src={partner.logo} alt={partner.name} className="max-h-8 w-auto" />
       ) : (
         <span className="font-heading text-base font-bold text-muted-foreground">
           {partner.name}
