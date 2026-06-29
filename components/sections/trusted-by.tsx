@@ -1,17 +1,15 @@
 import { Reveal } from "@/components/reveal"
 
-const PARTNERS: { name: string; logo?: string; isWhiteLogo?: boolean }[] = [
+const PARTNERS: { name: string; logo?: string }[] = [
   { name: "Cloud Camp BD", logo: "/partner-cloudcamp.webp" },
   { name: "PhotoZone Graphy", logo: "/partner-photozone.png" },
-  { name: "Event Partner", logo: "/partner-logo3.png", isWhiteLogo: true },
+  { name: "Event Partner", logo: "/partner-logo3.png" },
 ]
 
-function PartnerItem({ partner }: { partner: { name: string; logo?: string; isWhiteLogo?: boolean } }) {
+function PartnerItem({ partner }: { partner: { name: string; logo?: string } }) {
   return (
     <div
-      className={`flex h-16 w-44 shrink-0 items-center justify-center rounded-xl border px-6 grayscale opacity-70 transition-all duration-300 hover:opacity-100 hover:grayscale-0 ${
-        partner.isWhiteLogo ? "border-border/50 bg-slate-100" : "border-border bg-card"
-      }`}
+      className="flex h-16 w-44 shrink-0 items-center justify-center rounded-xl border border-border bg-white px-6 grayscale opacity-70 transition-all duration-300 hover:opacity-100 hover:grayscale-0"
     >
       {partner.logo ? (
         // eslint-disable-next-line @next/next/no-img-element
