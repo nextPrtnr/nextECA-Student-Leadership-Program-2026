@@ -31,7 +31,7 @@ const ITEMS = [
 
 export function Responsibilities() {
   return (
-    <section id="responsibilities" className="scroll-mt-20 bg-secondary/40 py-20 sm:py-28">
+    <section id="responsibilities" className="scroll-mt-20 bg-secondary/40 py-20 sm:py-28" style={{ paddingTop: '19px', paddingBottom: '41px' }}>
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="max-w-2xl">
           <Reveal>

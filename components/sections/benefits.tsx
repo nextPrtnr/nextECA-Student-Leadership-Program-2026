@@ -29,7 +29,7 @@ const BENEFITS = [
 
 export function Benefits() {
   return (
-    <section id="benefits" className="scroll-mt-20 py-20 sm:py-28">
+    <section id="benefits" className="scroll-mt-20 py-20 sm:py-28" style={{ paddingTop: '7px', paddingBottom: '24px' }}>
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">
           <Reveal>

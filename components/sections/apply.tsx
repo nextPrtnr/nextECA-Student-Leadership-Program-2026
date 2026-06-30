@@ -298,7 +298,7 @@ export function Apply() {
   }
 
   return (
-    <section id="apply" className="scroll-mt-20 bg-secondary/40 py-20 sm:py-28">
+    <section id="apply" className="scroll-mt-20 bg-secondary/40 py-20 sm:py-28" style={{ paddingTop: '42px' }}>
       <div className="mx-auto max-w-3xl px-4 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">
           <Reveal>

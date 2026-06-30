@@ -3,7 +3,7 @@ import { Reveal } from "@/components/reveal"
 
 export function Mission() {
   return (
-    <section id="mission" className="scroll-mt-20 py-20 sm:py-28">
+    <section id="mission" className="scroll-mt-20 py-20 sm:py-28" style={{ paddingTop: '23px', paddingBottom: '0px' }}>
       <div className="mx-auto max-w-5xl px-4 sm:px-6">
         <Reveal>
           <div className="relative overflow-hidden rounded-[2rem] border border-border bg-primary px-6 py-14 text-primary-foreground sm:px-14">
