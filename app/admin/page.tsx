@@ -451,36 +451,50 @@ export default function AdminPage() {
                   {selectedApp.profilePhotoUrl && (
                     <div>
                       <p className="text-sm text-muted-foreground mb-2">Profile Photo</p>
-                      <img
-                        src={selectedApp.profilePhotoUrl}
-                        alt="Profile"
-                        className="w-32 h-32 object-cover rounded-lg border border-border"
-                      />
+                      <div className="flex gap-3 items-end">
+                        <img
+                          src={selectedApp.profilePhotoUrl}
+                          alt="Profile"
+                          className="w-32 h-32 object-cover rounded-lg border border-border"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = ""
+                            console.error("Image failed to load:", selectedApp.profilePhotoUrl)
+                          }}
+                        />
+                        <a
+                          href={`/api/admin/download?url=${encodeURIComponent(selectedApp.profilePhotoUrl)}`}
+                          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-medium"
+                          download
+                        >
+                          <Download size={16} />
+                          Download
+                        </a>
+                      </div>
                     </div>
                   )}
                   {selectedApp.studentIdUrl && (
                     <div>
-                      <p className="text-sm text-muted-foreground mb-2">Student ID</p>
+                      <p className="text-sm text-muted-foreground mb-2">Student ID Card</p>
                       <a
-                        href={selectedApp.studentIdUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline text-sm"
+                        href={`/api/admin/download?url=${encodeURIComponent(selectedApp.studentIdUrl)}`}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-accent text-accent-foreground hover:bg-accent/90 transition-colors font-medium"
+                        download
                       >
-                        View Document →
+                        <Download size={16} />
+                        Download
                       </a>
                     </div>
                   )}
                   {selectedApp.resumeUrl && (
                     <div>
-                      <p className="text-sm text-muted-foreground mb-2">Resume</p>
+                      <p className="text-sm text-muted-foreground mb-2">Resume / CV</p>
                       <a
-                        href={selectedApp.resumeUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline text-sm"
+                        href={`/api/admin/download?url=${encodeURIComponent(selectedApp.resumeUrl)}`}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-accent text-accent-foreground hover:bg-accent/90 transition-colors font-medium"
+                        download
                       >
-                        View Resume →
+                        <Download size={16} />
+                        Download
                       </a>
                     </div>
                   )}
