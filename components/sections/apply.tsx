@@ -1,7 +1,8 @@
 "use client"
 
-import { useActionState, useCallback, useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useFormStatus } from "react-dom"
+import { useActionState } from "react"
 import {
   CheckCircle2,
   Loader2,
@@ -12,6 +13,8 @@ import {
   Sparkles,
   Paperclip,
   Flag,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react"
 import { submitApplication, type ApplyState } from "@/app/actions/apply"
 import { Button } from "@/components/ui/button"
@@ -27,25 +30,24 @@ const initialState: ApplyState = { success: false, message: "" }
 const inputClass = "rounded-xl"
 const textareaClass = "rounded-xl resize-none"
 
-// Required field names used to compute progress.
-const REQUIRED_FIELDS = [
-  "fullName",
-  "email",
-  "phone",
-  "facebook",
-  "city",
-  "university",
-  "fieldOfStudy",
-  "yearOfStudy",
-  "graduationYear",
-  "aboutYou",
-  "whyJoin",
-  "representImpact",
-  "willingEvents",
-  "futureLeadership",
-  "confirmAccurate",
-  "agreeGuidelines",
+const TOTAL_STEPS = 5
+
+const STEP_META: { title: string }[] = [
+  { title: "Personal & Academic" },
+  { title: "About You" },
+  { title: "Ambassador Fit" },
+  { title: "Attachments" },
+  { title: "Final Step" },
 ]
+
+// Required fields per step — used for client-side validation before advancing.
+const STEP_REQUIRED: Record<number, string[]> = {
+  1: ["fullName", "email", "phone", "facebook", "city", "university", "fieldOfStudy", "yearOfStudy", "graduationYear"],
+  2: ["aboutYou", "whyJoin"],
+  3: ["representImpact", "willingEvents", "futureLeadership"],
+  4: [],
+  5: ["confirmAccurate", "agreeGuidelines"],
+}
 
 function Field({
   id,
@@ -94,7 +96,7 @@ function SectionHeader({
       <div>
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold uppercase tracking-wider text-primary">
-            Step {step} of 5
+            Step {step} of {TOTAL_STEPS}
           </span>
         </div>
         <h3 className="mt-0.5 font-heading text-xl font-bold">{title}</h3>
@@ -166,7 +168,7 @@ function RadioPills({
 function SubmitButton() {
   const { pending } = useFormStatus()
   return (
-    <Button type="submit" size="lg" disabled={pending} className="w-full rounded-full text-base">
+    <Button type="submit" size="lg" disabled={pending} className="rounded-full text-base">
       {pending ? (
         <>
           <Loader2 className="size-4 animate-spin" />
@@ -185,39 +187,84 @@ function SubmitButton() {
 export function Apply() {
   const [state, formAction] = useActionState(submitApplication, initialState)
   const formRef = useRef<HTMLFormElement>(null)
-  const [progress, setProgress] = useState(0)
-  const errors = state.errors ?? {}
+  const [currentStep, setCurrentStep] = useState(1)
+  const [clientErrors, setClientErrors] = useState<Record<string, string>>({})
+  const allErrors = { ...(state.errors ?? {}), ...clientErrors }
 
-  const recompute = useCallback(() => {
+  // Validate the required fields for a given step using current form values.
+  function validateStep(step: number): Record<string, string> {
     const form = formRef.current
-    if (!form) return
-    let filled = 0
-    for (const field of REQUIRED_FIELDS) {
+    const errs: Record<string, string> = {}
+    if (!form) return errs
+    for (const field of STEP_REQUIRED[step]) {
       const els = form.elements.namedItem(field)
-      if (!els) continue
+      let value = ""
+      let checked = false
       if (els instanceof RadioNodeList) {
-        if ((els.value ?? "").trim() !== "") filled++
+        value = els.value ?? ""
       } else if (els instanceof HTMLInputElement) {
-        if (els.type === "checkbox") {
-          if (els.checked) filled++
-        } else if (els.value.trim() !== "") filled++
-      } else if (
-        els instanceof HTMLTextAreaElement ||
-        els instanceof HTMLSelectElement
-      ) {
-        if (els.value.trim() !== "") filled++
+        if (els.type === "checkbox") checked = els.checked
+        else value = els.value
+      } else if (els instanceof HTMLTextAreaElement || els instanceof HTMLSelectElement) {
+        value = els.value
+      }
+      if (field === "confirmAccurate" || field === "agreeGuidelines") {
+        if (!checked) errs[field] = "Please confirm to continue."
+      } else if (value.trim() === "") {
+        errs[field] = "This field is required."
+      } else if (field === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        errs[field] = "Please enter a valid email."
       }
     }
-    setProgress(Math.round((filled / REQUIRED_FIELDS.length) * 100))
-  }, [])
+    return errs
+  }
+
+  function scrollToTop() {
+    document.getElementById("apply")?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
+
+  function handleNext() {
+    const errs = validateStep(currentStep)
+    if (Object.keys(errs).length > 0) {
+      setClientErrors(errs)
+      return
+    }
+    setClientErrors({})
+    setCurrentStep((s) => Math.min(TOTAL_STEPS, s + 1))
+    scrollToTop()
+  }
+
+  function handleBack() {
+    setClientErrors({})
+    setCurrentStep((s) => Math.max(1, s - 1))
+    scrollToTop()
+  }
+
+  // Prevent Enter in text inputs from submitting the whole form mid-wizard.
+  function handleKeyDown(e: React.KeyboardEvent<HTMLFormElement>) {
+    const target = e.target as HTMLElement
+    if (
+      e.key === "Enter" &&
+      target.tagName === "INPUT" &&
+      !(e.nativeEvent as any).isComposing &&
+      (e.nativeEvent as any).keyCode !== 229
+    ) {
+      e.preventDefault()
+      if (currentStep < TOTAL_STEPS) handleNext()
+    }
+  }
 
   useEffect(() => {
     if (state.success) {
       formRef.current?.reset()
-      window.scrollTo({ top: document.getElementById("apply")?.offsetTop ?? 0, behavior: "smooth" })
+      scrollToTop()
     } else if (state.errors && Object.keys(state.errors).length > 0) {
-      // Scroll to the form so the user sees error highlights.
-      document.getElementById("apply")?.scrollIntoView({ behavior: "smooth" })
+      // Jump to the earliest step that has a server-reported error.
+      const firstStep = [1, 2, 3, 4, 5].find((st) =>
+        STEP_REQUIRED[st].some((f) => state.errors?.[f]),
+      )
+      if (firstStep) setCurrentStep(firstStep)
+      scrollToTop()
     }
   }, [state])
 
@@ -277,27 +324,38 @@ export function Apply() {
           <form
             ref={formRef}
             action={formAction}
-            onInput={recompute}
-            onChange={recompute}
+            onKeyDown={handleKeyDown}
             className="mt-10 overflow-hidden rounded-3xl border border-border bg-card shadow-sm"
           >
-            {/* Progress */}
-            <div className="sticky top-16 z-10 border-b border-border bg-card/90 px-6 py-4 backdrop-blur sm:px-8">
-              <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
-                <span>Your progress</span>
-                <span>{progress}%</span>
+            {/* Step progress */}
+            <div className="sticky top-16 z-10 border-b border-border bg-card px-6 py-4 shadow-sm sm:px-8">
+              <div className="flex items-center justify-between text-xs font-medium">
+                <span className="text-primary">
+                  Step {currentStep} of {TOTAL_STEPS}
+                </span>
+                <span className="text-muted-foreground">{STEP_META[currentStep - 1].title}</span>
               </div>
-              <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-primary transition-all duration-500 ease-out"
-                  style={{ width: `${progress}%` }}
-                />
+              <div className="mt-2 flex gap-1.5">
+                {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map((n) => (
+                  <div
+                    key={n}
+                    className={cn(
+                      "h-1.5 flex-1 rounded-full transition-colors duration-500",
+                      n <= currentStep ? "bg-primary" : "bg-muted",
+                    )}
+                  />
+                ))}
               </div>
             </div>
 
-            <div className="flex flex-col gap-10 p-6 sm:p-8">
+            <div className="p-6 sm:p-8">
               {/* SECTION 1 */}
-              <div className="flex flex-col gap-5">
+              <div
+                className={cn(
+                  "flex flex-col gap-5",
+                  currentStep === 1 ? "animate-in fade-in slide-in-from-right-4 duration-300" : "hidden",
+                )}
+              >
                 <SectionHeader
                   step={1}
                   icon={User}
@@ -305,16 +363,16 @@ export function Apply() {
                   description="Tell us a little about yourself."
                 />
                 <div className="grid gap-5 sm:grid-cols-2">
-                  <Field id="fullName" label="Full name" required error={errors.fullName}>
+                  <Field id="fullName" label="Full name" required error={allErrors.fullName}>
                     <Input id="fullName" name="fullName" placeholder="Jane Doe" className={inputClass} />
                   </Field>
-                  <Field id="email" label="Email address" required error={errors.email}>
+                  <Field id="email" label="Email address" required error={allErrors.email}>
                     <Input id="email" name="email" type="email" placeholder="jane@email.com" className={inputClass} />
                   </Field>
-                  <Field id="phone" label="Phone / WhatsApp" required error={errors.phone}>
+                  <Field id="phone" label="Phone / WhatsApp" required error={allErrors.phone}>
                     <Input id="phone" name="phone" placeholder="+880 1XXXXXXXXX" className={inputClass} />
                   </Field>
-                  <Field id="facebook" label="Facebook profile" required error={errors.facebook}>
+                  <Field id="facebook" label="Facebook profile" required error={allErrors.facebook}>
                     <Input id="facebook" name="facebook" placeholder="facebook.com/you" className={inputClass} />
                   </Field>
                   <Field id="linkedin" label="LinkedIn profile" hint="Optional but preferred.">
@@ -323,19 +381,19 @@ export function Apply() {
                   <Field id="instagram" label="Instagram profile" hint="Optional.">
                     <Input id="instagram" name="instagram" placeholder="@yourhandle" className={inputClass} />
                   </Field>
-                  <Field id="city" label="City" required error={errors.city}>
+                  <Field id="city" label="City" required error={allErrors.city}>
                     <Input id="city" name="city" placeholder="Your city" className={inputClass} />
                   </Field>
-                  <Field id="university" label="University / College" required error={errors.university}>
+                  <Field id="university" label="University / College" required error={allErrors.university}>
                     <Input id="university" name="university" placeholder="University name" className={inputClass} />
                   </Field>
-                  <Field id="fieldOfStudy" label="Department / Field of study" required error={errors.fieldOfStudy}>
+                  <Field id="fieldOfStudy" label="Department / Field of study" required error={allErrors.fieldOfStudy}>
                     <Input id="fieldOfStudy" name="fieldOfStudy" placeholder="e.g. Computer Science" className={inputClass} />
                   </Field>
-                  <Field id="yearOfStudy" label="Current semester / year" required error={errors.yearOfStudy}>
+                  <Field id="yearOfStudy" label="Current semester / year" required error={allErrors.yearOfStudy}>
                     <Input id="yearOfStudy" name="yearOfStudy" placeholder="e.g. 3rd Semester" className={inputClass} />
                   </Field>
-                  <Field id="graduationYear" label="Expected graduation / passing year" required error={errors.graduationYear}>
+                  <Field id="graduationYear" label="Expected graduation / passing year" required error={allErrors.graduationYear}>
                     <Input id="graduationYear" name="graduationYear" placeholder="e.g. 2027" className={inputClass} />
                   </Field>
                   <Field label="Upload Student ID Card" hint="Optional. Preferred for student verification. Max 3 MB.">
@@ -345,17 +403,22 @@ export function Apply() {
               </div>
 
               {/* SECTION 2 */}
-              <div className="flex flex-col gap-5 border-t border-border pt-10">
+              <div
+                className={cn(
+                  "flex flex-col gap-5",
+                  currentStep === 2 ? "animate-in fade-in slide-in-from-right-4 duration-300" : "hidden",
+                )}
+              >
                 <SectionHeader
                   step={2}
                   icon={Heart}
                   title="About You"
                   description="We'd love to know you beyond your academic profile."
                 />
-                <Field id="aboutYou" label="Tell us about yourself" required error={errors.aboutYou}>
+                <Field id="aboutYou" label="Tell us about yourself" required error={allErrors.aboutYou}>
                   <Textarea id="aboutYou" name="aboutYou" rows={4} placeholder="A short introduction—who you are, what drives you..." className={textareaClass} />
                 </Field>
-                <Field id="whyJoin" label="Why do you want to join the next ECA Student Leadership Program?" required error={errors.whyJoin}>
+                <Field id="whyJoin" label="Why do you want to join the next ECA Student Leadership Program?" required error={allErrors.whyJoin}>
                   <Textarea id="whyJoin" name="whyJoin" rows={4} placeholder="Share what motivates you to lead and create impact..." className={textareaClass} />
                 </Field>
                 <Field id="leadershipExperience" label="Relevant leadership / club / volunteering / event experience" hint="Optional.">
@@ -367,17 +430,22 @@ export function Apply() {
               </div>
 
               {/* SECTION 3 */}
-              <div className="flex flex-col gap-5 border-t border-border pt-10">
+              <div
+                className={cn(
+                  "flex flex-col gap-5",
+                  currentStep === 3 ? "animate-in fade-in slide-in-from-right-4 duration-300" : "hidden",
+                )}
+              >
                 <SectionHeader
                   step={3}
                   icon={Sparkles}
                   title="Ambassador Fit & Future Opportunities"
                   description="Help us understand how you'd contribute to the community."
                 />
-                <Field id="representImpact" label="How would you represent next ECA online & offline and create real impact?" required error={errors.representImpact}>
+                <Field id="representImpact" label="How would you represent next ECA online & offline and create real impact?" required error={allErrors.representImpact}>
                   <Textarea id="representImpact" name="representImpact" rows={4} placeholder="Share your ideas for representing next ECA and making an impact." className={textareaClass} />
                 </Field>
-                <Field label="Would you be willing to organize or support campus events with next ECA?" required error={errors.willingEvents}>
+                <Field label="Would you be willing to organize or support campus events with next ECA?" required error={allErrors.willingEvents}>
                   <RadioPills name="willingEvents" options={["Yes", "Maybe", "Not at the moment"]} />
                 </Field>
                 <Field id="justifyEvents" label="Please justify your previous answer." hint="Optional.">
@@ -390,7 +458,7 @@ export function Apply() {
                     options={["2–4 Hours", "4–6 Hours", "6–8 Hours", "8+ Hours"]}
                   />
                 </Field>
-                <Field label="Do you enjoy leadership and want future leadership opportunities within next ECA?" required error={errors.futureLeadership}>
+                <Field label="Do you enjoy leadership and want future leadership opportunities within next ECA?" required error={allErrors.futureLeadership}>
                   <RadioPills name="futureLeadership" options={["Yes", "Maybe", "Not right now"]} />
                 </Field>
                 <Field id="interestArea" label="Which area interests you the most for future opportunities?">
@@ -425,7 +493,12 @@ export function Apply() {
               </div>
 
               {/* SECTION 4 */}
-              <div className="flex flex-col gap-5 border-t border-border pt-10">
+              <div
+                className={cn(
+                  "flex flex-col gap-5",
+                  currentStep === 4 ? "animate-in fade-in slide-in-from-right-4 duration-300" : "hidden",
+                )}
+              >
                 <SectionHeader
                   step={4}
                   icon={Paperclip}
@@ -460,7 +533,12 @@ export function Apply() {
               </div>
 
               {/* SECTION 5 */}
-              <div className="flex flex-col gap-5 border-t border-border pt-10">
+              <div
+                className={cn(
+                  "flex flex-col gap-5",
+                  currentStep === 5 ? "animate-in fade-in slide-in-from-right-4 duration-300" : "hidden",
+                )}
+              >
                 <SectionHeader
                   step={5}
                   icon={Flag}
@@ -508,13 +586,13 @@ export function Apply() {
                 <div className="flex flex-col gap-3 pt-2">
                   <label className="flex cursor-pointer items-start gap-3 text-sm">
                     <input type="checkbox" name="confirmAccurate" className="mt-0.5 size-4 accent-primary" />
-                    <span className={cn(errors.confirmAccurate && "text-destructive")}>
+                    <span className={cn(allErrors.confirmAccurate && "text-destructive")}>
                       I confirm all information provided is accurate.
                     </span>
                   </label>
                   <label className="flex cursor-pointer items-start gap-3 text-sm">
                     <input type="checkbox" name="agreeGuidelines" className="mt-0.5 size-4 accent-primary" />
-                    <span className={cn(errors.agreeGuidelines && "text-destructive")}>
+                    <span className={cn(allErrors.agreeGuidelines && "text-destructive")}>
                       I agree to follow the{" "}
                       <a href="/community-guidelines" target="_blank" className="font-medium text-primary underline underline-offset-2">
                         next ECA Community Guidelines
@@ -527,19 +605,41 @@ export function Apply() {
               </div>
 
               {state.message && !state.success && (
-                <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                <p className="mt-6 rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
                   {state.message}
                 </p>
               )}
+            </div>
 
-              <div>
-                <SubmitButton />
-                <p className="mt-3 text-center text-xs text-muted-foreground">
-                  By applying you agree to be contacted by the next ECA team about the program.
-                </p>
+            {/* Navigation */}
+            <div className="flex items-center gap-3 border-t border-border bg-secondary/30 px-6 py-5 sm:px-8">
+              {currentStep > 1 ? (
+                <Button type="button" variant="outline" onClick={handleBack} className="rounded-full">
+                  <ChevronLeft className="size-4" />
+                  Back
+                </Button>
+              ) : (
+                <span className="text-xs text-muted-foreground">
+                  Your progress is kept as you move between steps.
+                </span>
+              )}
+              <div className="ml-auto">
+                {currentStep < TOTAL_STEPS ? (
+                  <Button type="button" onClick={handleNext} className="rounded-full">
+                    Next
+                    <ChevronRight className="size-4" />
+                  </Button>
+                ) : (
+                  <SubmitButton />
+                )}
               </div>
             </div>
           </form>
+          {currentStep === TOTAL_STEPS && (
+            <p className="mt-3 text-center text-xs text-muted-foreground">
+              By applying you agree to be contacted by the next ECA team about the program.
+            </p>
+          )}
         </Reveal>
       </div>
     </section>
