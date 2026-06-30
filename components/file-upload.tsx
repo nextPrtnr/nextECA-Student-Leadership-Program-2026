@@ -7,10 +7,12 @@ export function FileUpload({
   name,
   accept,
   label,
+  maxSizeMB = 4,
 }: {
   name: string
   accept?: string
   label: string
+  maxSizeMB?: number
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [status, setStatus] = useState<"idle" | "uploading" | "done" | "error">("idle")
@@ -21,12 +23,20 @@ export function FileUpload({
   async function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+    if (file.size > maxSizeMB * 1024 * 1024) {
+      setStatus("error")
+      setFileName(file.name)
+      setError(`File is too large. Maximum size is ${maxSizeMB} MB.`)
+      if (inputRef.current) inputRef.current.value = ""
+      return
+    }
     setStatus("uploading")
     setError("")
     setFileName(file.name)
     try {
       const fd = new FormData()
       fd.append("file", file)
+      fd.append("maxSizeMB", String(maxSizeMB))
       const res = await fetch("/api/upload", { method: "POST", body: fd })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || "Upload failed")

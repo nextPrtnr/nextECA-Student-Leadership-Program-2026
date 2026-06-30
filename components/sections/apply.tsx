@@ -338,8 +338,8 @@ export function Apply() {
                   <Field id="graduationYear" label="Expected graduation / passing year" required error={errors.graduationYear}>
                     <Input id="graduationYear" name="graduationYear" placeholder="e.g. 2027" className={inputClass} />
                   </Field>
-                  <Field label="Upload Student ID Card" hint="Optional. Preferred for student verification.">
-                    <FileUpload name="studentIdUrl" accept="image/*,.pdf" label="Upload Student ID" />
+                  <Field label="Upload Student ID Card" hint="Optional. Preferred for student verification. Max 3 MB.">
+                    <FileUpload name="studentIdUrl" accept="image/*,.pdf" label="Upload Student ID (max 3 MB)" maxSizeMB={3} />
                   </Field>
                 </div>
               </div>
@@ -433,11 +433,11 @@ export function Apply() {
                   description="Optional information that helps us better support our ambassadors."
                 />
                 <div className="grid gap-5 sm:grid-cols-2">
-                  <Field label="Upload Resume / CV" hint="Optional.">
-                    <FileUpload name="resumeUrl" accept=".pdf,.doc,.docx" label="Upload Resume / CV" />
+                  <Field label="Upload Resume / CV" hint="Optional. Max 3 MB.">
+                    <FileUpload name="resumeUrl" accept=".pdf,.doc,.docx" label="Upload Resume / CV (max 3 MB)" maxSizeMB={3} />
                   </Field>
-                  <Field label="Upload Profile Photo" hint="Optional.">
-                    <FileUpload name="profilePhotoUrl" accept="image/*" label="Upload Profile Photo" />
+                  <Field label="Upload Profile Photo" hint="Optional. Max 4 MB.">
+                    <FileUpload name="profilePhotoUrl" accept="image/*" label="Upload Profile Photo (max 4 MB)" maxSizeMB={4} />
                   </Field>
                 </div>
                 <p className="rounded-xl bg-muted/60 px-4 py-3 text-xs leading-relaxed text-muted-foreground">

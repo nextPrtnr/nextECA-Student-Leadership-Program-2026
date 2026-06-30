@@ -1,7 +1,7 @@
 import { put } from "@vercel/blob"
 import { type NextRequest, NextResponse } from "next/server"
 
-const MAX_SIZE = 5 * 1024 * 1024 // 5MB
+const HARD_MAX_MB = 4 // absolute server-side cap regardless of client request
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,8 +12,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 })
     }
 
-    if (file.size > MAX_SIZE) {
-      return NextResponse.json({ error: "File must be under 5MB" }, { status: 400 })
+    const requestedMB = Number(formData.get("maxSizeMB")) || HARD_MAX_MB
+    const limitMB = Math.min(requestedMB, HARD_MAX_MB)
+
+    if (file.size > limitMB * 1024 * 1024) {
+      return NextResponse.json(
+        { error: `File must be under ${limitMB} MB` },
+        { status: 400 },
+      )
     }
 
     const blob = await put(`applications/${Date.now()}-${file.name}`, file, {
