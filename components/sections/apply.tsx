@@ -348,7 +348,7 @@ export function Apply() {
               </div>
             </div>
 
-            <div className="p-6 pt-8 sm:p-8 sm:pt-10">
+            <div className="p-6 pt-16 sm:p-8 sm:pt-20">
               {/* SECTION 1 */}
               <div
                 className={cn(
