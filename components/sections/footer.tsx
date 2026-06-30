@@ -28,6 +28,7 @@ export function Footer() {
                 <li><a href="#responsibilities" className="hover:text-foreground">Responsibilities</a></li>
                 <li><a href="#benefits" className="hover:text-foreground">Benefits</a></li>
                 <li><a href="#mission" className="hover:text-foreground">Mission</a></li>
+                <li><a href="/community-guidelines" className="hover:text-foreground">Community Guidelines</a></li>
               </ul>
             </div>
             <div className="col-span-2 sm:col-span-2">
