@@ -21,7 +21,7 @@ const POINTS = [
 
 export function About() {
   return (
-    <section id="about" className="scroll-mt-20 py-20 sm:py-28">
+    <section id="about" className="scroll-mt-20 py-20 sm:py-28" style={{ paddingTop: '20px', paddingBottom: '25px' }}>
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="mx-auto max-w-3xl text-center">
           <Reveal>
