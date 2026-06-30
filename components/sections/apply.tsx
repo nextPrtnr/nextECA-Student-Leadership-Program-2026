@@ -77,6 +77,51 @@ function Field({
   )
 }
 
+function CharCountField({
+  id,
+  name,
+  label,
+  minChars,
+  placeholder,
+  error,
+}: {
+  id: string
+  name: string
+  label: string
+  minChars: number
+  placeholder?: string
+  error?: string
+}) {
+  const [charCount, setCharCount] = useState(0)
+  const isSufficient = charCount >= minChars
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex justify-between items-baseline">
+        <Label htmlFor={id} className="text-sm font-medium">
+          {label}
+          <span className="text-primary"> *</span>
+        </Label>
+        <span className={`text-xs font-medium ${isSufficient ? "text-green-600" : "text-muted-foreground"}`}>
+          {charCount}/{minChars}
+        </span>
+      </div>
+      <Textarea
+        id={id}
+        name={name}
+        placeholder={placeholder}
+        className={cn(textareaClass, error && "border-destructive focus:ring-destructive/20")}
+        onChange={(e) => setCharCount(e.target.value.trim().length)}
+        onBlur={(e) => setCharCount(e.target.value.trim().length)}
+      />
+      {!isSufficient && charCount > 0 && (
+        <p className="text-xs text-amber-600">Need {minChars - charCount} more characters</p>
+      )}
+      {error && <p className="text-xs text-destructive">{error}</p>}
+    </div>
+  )
+}
+
 function SectionHeader({
   step,
   icon: Icon,
@@ -191,6 +236,9 @@ export function Apply() {
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({})
   const allErrors = { ...(state.errors ?? {}), ...clientErrors }
 
+  // Min character requirements for text fields
+  const MIN_CHARS = { aboutYou: 20, whyJoin: 30, representImpact: 20 }
+
   // Validate the required fields for a given step using current form values.
   function validateStep(step: number): Record<string, string> {
     const form = formRef.current
@@ -214,6 +262,11 @@ export function Apply() {
         errs[field] = "This field is required."
       } else if (field === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
         errs[field] = "Please enter a valid email."
+      } else if (field in MIN_CHARS) {
+        const minLen = MIN_CHARS[field as keyof typeof MIN_CHARS]
+        if (value.trim().length < minLen) {
+          errs[field] = `Please write at least ${minLen} characters.`
+        }
       }
     }
     return errs
@@ -257,8 +310,12 @@ export function Apply() {
   useEffect(() => {
     if (state.success) {
       formRef.current?.reset()
+      setCurrentStep(1)
+      setClientErrors({})
       scrollToTop()
     } else if (state.errors && Object.keys(state.errors).length > 0) {
+      // Convert server errors to client errors so form data persists
+      setClientErrors(state.errors)
       // Jump to the earliest step that has a server-reported error.
       const firstStep = [1, 2, 3, 4, 5].find((st) =>
         STEP_REQUIRED[st].some((f) => state.errors?.[f]),
@@ -415,12 +472,22 @@ export function Apply() {
                   title="About You"
                   description="We'd love to know you beyond your academic profile."
                 />
-                <Field id="aboutYou" label="Tell us about yourself" required error={allErrors.aboutYou}>
-                  <Textarea id="aboutYou" name="aboutYou" rows={4} placeholder="A short introduction—who you are, what drives you..." className={textareaClass} />
-                </Field>
-                <Field id="whyJoin" label="Why do you want to join the next ECA Student Leadership Program?" required error={allErrors.whyJoin}>
-                  <Textarea id="whyJoin" name="whyJoin" rows={4} placeholder="Share what motivates you to lead and create impact..." className={textareaClass} />
-                </Field>
+                <CharCountField
+                  id="aboutYou"
+                  name="aboutYou"
+                  label="Tell us about yourself"
+                  minChars={20}
+                  placeholder="A short introduction—who you are, what drives you..."
+                  error={allErrors.aboutYou}
+                />
+                <CharCountField
+                  id="whyJoin"
+                  name="whyJoin"
+                  label="Why do you want to join the next ECA Student Leadership Program?"
+                  minChars={30}
+                  placeholder="Share what motivates you to lead and create impact..."
+                  error={allErrors.whyJoin}
+                />
                 <Field id="leadershipExperience" label="Relevant leadership / club / volunteering / event experience" hint="Optional.">
                   <Textarea id="leadershipExperience" name="leadershipExperience" rows={3} placeholder="Tell us about any leadership or community experience." className={textareaClass} />
                 </Field>
@@ -442,9 +509,14 @@ export function Apply() {
                   title="Ambassador Fit & Future Opportunities"
                   description="Help us understand how you'd contribute to the community."
                 />
-                <Field id="representImpact" label="How would you represent next ECA online & offline and create real impact?" required error={allErrors.representImpact}>
-                  <Textarea id="representImpact" name="representImpact" rows={4} placeholder="Share your ideas for representing next ECA and making an impact." className={textareaClass} />
-                </Field>
+                <CharCountField
+                  id="representImpact"
+                  name="representImpact"
+                  label="How would you represent next ECA online & offline and create real impact?"
+                  minChars={20}
+                  placeholder="Share your ideas for representing next ECA and making an impact."
+                  error={allErrors.representImpact}
+                />
                 <Field label="Would you be willing to organize or support campus events with next ECA?" required error={allErrors.willingEvents}>
                   <RadioPills name="willingEvents" options={["Yes", "Maybe", "Not at the moment"]} />
                 </Field>
