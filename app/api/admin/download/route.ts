@@ -1,30 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 
-// Map file extensions to MIME types
-const MIME_TYPES: Record<string, string> = {
-  pdf: "application/pdf",
-  doc: "application/msword",
-  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  jpg: "image/jpeg",
-  jpeg: "image/jpeg",
-  png: "image/png",
-  gif: "image/gif",
-  webp: "image/webp",
-  txt: "text/plain",
-  csv: "text/csv",
-  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  xls: "application/vnd.ms-excel",
-}
-
-function getMimeType(filename: string): string {
-  const ext = filename.split(".").pop()?.toLowerCase()
-  if (!ext) return "application/octet-stream"
-  return MIME_TYPES[ext] || "application/octet-stream"
-}
-
 export async function GET(request: NextRequest) {
   const fileUrl = request.nextUrl.searchParams.get("url")
   const adminKey = request.nextUrl.searchParams.get("key")
+  const filename = request.nextUrl.searchParams.get("filename")
 
   // Verify admin key
   if (!adminKey || adminKey !== process.env.ADMIN_SECRET_KEY) {
@@ -36,37 +15,35 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Fetch the file from Vercel Blob
-    const response = await fetch(decodeURIComponent(fileUrl))
+    const decodedUrl = decodeURIComponent(fileUrl)
+    console.log("[v0] Downloading file:", decodedUrl.substring(0, 100))
+    
+    // Fetch the file from Vercel Blob storage
+    const response = await fetch(decodedUrl, {
+      method: "GET",
+    })
+
     if (!response.ok) {
+      console.error("[v0] Fetch failed:", response.status, response.statusText)
       throw new Error(`Failed to fetch file: ${response.statusText}`)
     }
 
-    const arrayBuffer = await response.arrayBuffer()
-    
-    // Determine filename and MIME type from URL
-    const urlObj = new URL(decodeURIComponent(fileUrl))
-    const pathname = urlObj.pathname
-    let filename = pathname.split("/").pop() || "download"
-    
-    // Remove query parameters from filename
-    filename = filename.split("?")[0]
-    
-    // Get proper MIME type based on extension
-    const mimeType = getMimeType(filename)
+    // Get the blob data
+    const blob = await response.blob()
+    console.log("[v0] Blob size:", blob.size, "Blob type:", blob.type)
 
-    // Return the file with appropriate headers
-    return new NextResponse(arrayBuffer, {
+    // Return the file as binary with proper download headers
+    return new NextResponse(blob, {
       status: 200,
       headers: {
-        "Content-Type": mimeType,
-        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Type": blob.type || "application/octet-stream",
+        "Content-Disposition": filename ? `attachment; filename="${filename}"` : "attachment",
+        "Content-Length": blob.size.toString(),
         "Cache-Control": "no-cache, no-store, must-revalidate",
-        "Pragma": "no-cache",
       },
     })
   } catch (error) {
-    console.error("[v0] Download error:", error)
-    return new NextResponse("Failed to download file", { status: 500 })
+    console.error("[v0] Download error:", error instanceof Error ? error.message : String(error))
+    return new NextResponse("Failed to process download", { status: 500 })
   }
 }
