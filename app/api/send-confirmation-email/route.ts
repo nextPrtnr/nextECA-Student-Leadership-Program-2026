@@ -19,22 +19,19 @@ export async function POST(request: NextRequest) {
 
     console.log("[v0] Sending confirmation email to:", email)
 
-    // Render the email component to HTML
-    const emailContent = React.createElement(ConfirmationEmail, {
-      fullName,
-      email,
-      university,
-      facebook,
-      city,
-      submissionDate,
-    })
-
     // Send email using Resend
     const response = await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
       to: email,
-      subject: "Welcome to next ECA! 🎉 Your Application Has Been Received",
-      react: emailContent,
+      subject: "Welcome to next ECA! Your Application Has Been Received",
+      react: React.createElement(ConfirmationEmail, {
+        fullName,
+        email,
+        university,
+        facebook,
+        city,
+        submissionDate,
+      }),
     })
 
     if (response.error) {
