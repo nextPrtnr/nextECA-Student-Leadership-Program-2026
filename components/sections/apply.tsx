@@ -102,8 +102,12 @@ function CharCountField({
           {label}
           <span className="text-primary"> *</span>
         </Label>
-        <span className={`text-xs font-medium ${isSufficient ? "text-green-600" : "text-muted-foreground"}`}>
-          {charCount}/{minChars}
+        <span className={`text-xs font-medium ${isSufficient ? "text-green-600" : "text-amber-600"}`}>
+          {isSufficient ? (
+            <span>✓ {charCount} characters</span>
+          ) : (
+            <span>Minimum {minChars} characters</span>
+          )}
         </span>
       </div>
       <Textarea
@@ -115,7 +119,7 @@ function CharCountField({
         onBlur={(e) => setCharCount(e.target.value.trim().length)}
       />
       {!isSufficient && charCount > 0 && (
-        <p className="text-xs text-amber-600">Need {minChars - charCount} more characters</p>
+        <p className="text-xs text-amber-600">Need {minChars - charCount} more characters to continue</p>
       )}
       {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
