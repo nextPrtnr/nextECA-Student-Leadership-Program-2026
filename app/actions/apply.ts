@@ -94,6 +94,33 @@ export async function submitApplication(
       referralName: orNull(formData, "referralName"),
       aiUsage: orNull(formData, "aiUsage"),
     })
+
+    // Send confirmation email after successful insertion
+    try {
+      const emailResponse = await fetch(
+        new URL("/api/send-confirmation-email", process.env.NEXTAUTH_URL || "http://localhost:3000"),
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fullName,
+            email,
+            university,
+            facebook,
+            city,
+            submissionDate: new Date().toISOString(),
+          }),
+        }
+      )
+
+      if (!emailResponse.ok) {
+        console.warn("[v0] Failed to send confirmation email:", await emailResponse.text())
+        // Don't fail the application submission if email fails
+      }
+    } catch (emailErr) {
+      console.warn("[v0] Email sending error:", emailErr instanceof Error ? emailErr.message : String(emailErr))
+      // Don't fail the application submission if email fails
+    }
   } catch (err) {
     console.log("[v0] submitApplication error:", err)
     return { success: false, message: "Something went wrong. Please try again." }
