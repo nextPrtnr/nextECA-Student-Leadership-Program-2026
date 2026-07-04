@@ -458,9 +458,11 @@ export default function AdminPage() {
                           className="w-32 h-32 object-cover rounded-lg border border-border bg-muted"
                         />
                         <a
-                          href={`/api/admin/download?url=${encodeURIComponent(selectedApp.profilePhotoUrl)}&key=${encodeURIComponent(adminKey)}`}
+                          href={selectedApp.profilePhotoUrl}
                           className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-medium"
-                          download
+                          download={`${selectedApp.fullName}-profile.jpg`}
+                          target="_blank"
+                          rel="noopener noreferrer"
                         >
                           <Download size={16} />
                           Download
@@ -472,9 +474,11 @@ export default function AdminPage() {
                     <div>
                       <p className="text-sm text-muted-foreground mb-2">Student ID Card</p>
                       <a
-                        href={`/api/admin/download?url=${encodeURIComponent(selectedApp.studentIdUrl)}&key=${encodeURIComponent(adminKey)}`}
+                        href={selectedApp.studentIdUrl}
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-accent text-accent-foreground hover:bg-accent/90 transition-colors font-medium"
-                        download
+                        download={`${selectedApp.fullName}-studentid`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                       >
                         <Download size={16} />
                         Download
@@ -485,9 +489,11 @@ export default function AdminPage() {
                     <div>
                       <p className="text-sm text-muted-foreground mb-2">Resume / CV</p>
                       <a
-                        href={`/api/admin/download?url=${encodeURIComponent(selectedApp.resumeUrl)}&key=${encodeURIComponent(adminKey)}`}
+                        href={selectedApp.resumeUrl}
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-accent text-accent-foreground hover:bg-accent/90 transition-colors font-medium"
-                        download
+                        download={`${selectedApp.fullName}-resume`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                       >
                         <Download size={16} />
                         Download

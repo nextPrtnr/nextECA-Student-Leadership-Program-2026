@@ -23,12 +23,12 @@ export async function POST(request: NextRequest) {
     }
 
     const blob = await put(`applications/${Date.now()}-${file.name}`, file, {
-      access: "private",
+      access: "public",
       addRandomSuffix: true,
     })
 
-    // Private store: return the pathname, not the URL.
-    return NextResponse.json({ pathname: blob.pathname })
+    // Return the public URL so it can be accessed directly
+    return NextResponse.json({ pathname: blob.url })
   } catch (error) {
     console.error("[v0] Upload error:", error)
     return NextResponse.json({ error: "Upload failed" }, { status: 500 })

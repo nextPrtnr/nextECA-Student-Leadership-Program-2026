@@ -82,6 +82,7 @@ function CharCountField({
   name,
   label,
   minChars,
+  maxChars = 250,
   placeholder,
   error,
 }: {
@@ -89,6 +90,7 @@ function CharCountField({
   name: string
   label: string
   minChars: number
+  maxChars?: number
   placeholder?: string
   error?: string
 }) {
@@ -102,8 +104,12 @@ function CharCountField({
           {label}
           <span className="text-primary"> *</span>
         </Label>
-        <span className={`text-xs font-medium ${isSufficient ? "text-green-600" : "text-muted-foreground"}`}>
-          {charCount}/{minChars}
+        <span className={`text-xs font-medium ${isSufficient ? "text-green-600" : "text-amber-600"}`}>
+          {isSufficient ? (
+            <span className="text-green-600">✓ {charCount} characters (Min {minChars}, Max {maxChars})</span>
+          ) : (
+            <span className="text-amber-600">Min {minChars}, Max {maxChars}</span>
+          )}
         </span>
       </div>
       <Textarea
@@ -115,7 +121,10 @@ function CharCountField({
         onBlur={(e) => setCharCount(e.target.value.trim().length)}
       />
       {!isSufficient && charCount > 0 && (
-        <p className="text-xs text-amber-600">Need {minChars - charCount} more characters</p>
+        <p className="text-xs text-amber-600">Need {minChars - charCount} more characters to continue</p>
+      )}
+      {isSufficient && (
+        <p className="text-xs text-green-600">✓ You can proceed to the next step</p>
       )}
       {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
@@ -453,8 +462,8 @@ export function Apply() {
                   <Field id="graduationYear" label="Expected graduation / passing year" required error={allErrors.graduationYear}>
                     <Input id="graduationYear" name="graduationYear" placeholder="e.g. 2027" className={inputClass} />
                   </Field>
-                  <Field label="Upload Student ID Card" hint="Optional. Preferred for student verification. Max 3 MB.">
-                    <FileUpload name="studentIdUrl" accept="image/*,.pdf" label="Upload Student ID (max 3 MB)" maxSizeMB={3} />
+                  <Field label="Upload Student ID Card" hint="Optional. Preferred for student verification. JPG, PNG, or PDF. Max 3 MB. Rename as: YourName_StudentID.jpg">
+                    <FileUpload name="studentIdUrl" accept="image/jpeg,image/png,.pdf" label="Upload Student ID (JPG/PNG/PDF, max 3 MB)" maxSizeMB={3} />
                   </Field>
                 </div>
               </div>
@@ -577,12 +586,16 @@ export function Apply() {
                   title="Attachments & Preferences"
                   description="Optional information that helps us better support our ambassadors."
                 />
+                <div className="rounded-xl bg-blue-50 border border-blue-200 px-4 py-3">
+                  <p className="text-xs text-blue-900 font-medium mb-1">📝 File Naming Instruction</p>
+                  <p className="text-xs text-blue-800">Please rename your files with your full name before uploading. Example: <span className="font-mono bg-white px-1.5 py-0.5 rounded">Rahim_Miya.pdf</span> or <span className="font-mono bg-white px-1.5 py-0.5 rounded">Rahim_Miya.jpg</span></p>
+                </div>
                 <div className="grid gap-5 sm:grid-cols-2">
-                  <Field label="Upload Resume / CV" hint="Optional. Max 3 MB.">
-                    <FileUpload name="resumeUrl" accept=".pdf,.doc,.docx" label="Upload Resume / CV (max 3 MB)" maxSizeMB={3} />
+                  <Field label="Upload Resume / CV" hint="PDF format only. Max 3 MB.">
+                    <FileUpload name="resumeUrl" accept=".pdf" label="Upload Resume / CV (PDF only, max 3 MB)" maxSizeMB={3} />
                   </Field>
-                  <Field label="Upload Profile Photo" hint="Optional. Max 4 MB.">
-                    <FileUpload name="profilePhotoUrl" accept="image/*" label="Upload Profile Photo (max 4 MB)" maxSizeMB={4} />
+                  <Field label="Upload Profile Photo" hint="JPG or PNG format. Max 4 MB.">
+                    <FileUpload name="profilePhotoUrl" accept="image/jpeg,image/png" label="Upload Profile Photo (JPG/PNG, max 4 MB)" maxSizeMB={4} />
                   </Field>
                 </div>
                 <p className="rounded-xl bg-muted/60 px-4 py-3 text-xs leading-relaxed text-muted-foreground">
