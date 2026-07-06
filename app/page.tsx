@@ -1,5 +1,4 @@
 import { SiteNav } from "@/components/site-nav"
-import { DeadlineBanner } from "@/components/deadline-banner"
 import { Hero } from "@/components/sections/hero"
 import { About } from "@/components/sections/about"
 import { Responsibilities } from "@/components/sections/responsibilities"
@@ -13,7 +12,6 @@ export default function Page() {
   return (
     <>
       <SiteNav />
-      <DeadlineBanner />
       <main>
         <Hero />
         <About />

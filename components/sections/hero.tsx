@@ -1,6 +1,7 @@
-import { ArrowRight, Sparkles, Star, Users, Award, Calendar } from "lucide-react"
+import { ArrowRight, Sparkles, Star, Users, Award, Calendar, Clock } from "lucide-react"
 import { buttonVariants } from "@/components/ui/button"
 import { Reveal } from "@/components/reveal"
+import { DeadlineTimer } from "@/components/deadline-timer"
 import { cn } from "@/lib/utils"
 
 const STATS = [
@@ -12,7 +13,7 @@ const STATS = [
 
 export function Hero() {
   return (
-    <section id="top" className="relative overflow-hidden pt-28 pb-16 sm:pt-32 sm:pb-24">
+    <section id="top" className="relative overflow-hidden pt-16 pb-16 sm:pt-20 sm:pb-24">
       {/* background accents */}
       <div
         aria-hidden
@@ -24,6 +25,11 @@ export function Hero() {
       />
 
       <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[1.05fr_0.95fr]">
+        {/* Floating Deadline Timer */}
+        <div className="absolute -top-8 right-0 sm:right-4 lg:right-0">
+          <DeadlineTimer />
+        </div>
+
         <div>
           <Reveal>
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm font-medium text-muted-foreground shadow-sm">
