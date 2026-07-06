@@ -222,7 +222,7 @@ function RadioPills({
 function SubmitButton() {
   const { pending } = useFormStatus()
   return (
-    <Button type="submit" size="lg" disabled={pending} className="rounded-full text-base">
+    <Button type="submit" size="lg" disabled={pending} className="rounded-full text-base bg-red-600 hover:bg-red-700 text-white" style={{ backgroundColor: '#da0000' }}>
       {pending ? (
         <>
           <Loader2 className="size-4 animate-spin" />

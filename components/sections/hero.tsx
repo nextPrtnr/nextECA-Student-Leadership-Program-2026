@@ -12,7 +12,7 @@ const STATS = [
 
 export function Hero() {
   return (
-    <section id="top" className="relative overflow-hidden pt-16 pb-16 sm:pt-20 sm:pb-24">
+    <section id="top" className="relative overflow-hidden pt-0 pb-20 sm:pt-0 sm:pb-24">
       {/* background accents */}
       <div
         aria-hidden
@@ -69,7 +69,7 @@ export function Hero() {
           </Reveal>
 
           <Reveal delay={320}>
-            <dl className="mt-10 grid max-w-2xl grid-cols-2 gap-4 sm:grid-cols-4">
+            <dl className="mt-4 grid max-w-2xl grid-cols-2 gap-4 sm:grid-cols-4">
               {STATS.map((s) => (
                 <div key={s.label} className="rounded-2xl border border-border bg-card p-4">
                   <s.icon className="size-5 text-primary" />
