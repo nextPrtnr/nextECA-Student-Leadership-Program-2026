@@ -6,7 +6,7 @@ export function Mission() {
     <section id="mission" className="scroll-mt-20 py-20 sm:py-28" style={{ paddingTop: '23px', paddingBottom: '0px' }}>
       <div className="mx-auto max-w-5xl px-4 sm:px-6">
         <Reveal>
-          <div className="relative overflow-hidden rounded-[2rem] border border-border bg-primary px-6 py-14 text-primary-foreground sm:px-14">
+          <div className="relative overflow-hidden rounded-[2rem] border border-border bg-red-600 px-6 py-14 text-primary-foreground sm:px-14" style={{ backgroundColor: '#db3030' }}>
             <div
               aria-hidden
               className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full bg-accent/30 blur-3xl"
