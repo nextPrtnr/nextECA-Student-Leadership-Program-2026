@@ -23,6 +23,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Reveal } from "@/components/reveal"
 import { FileUpload } from "@/components/file-upload"
+import { useFormAutoSave } from "@/hooks/use-form-autosave"
 import { cn } from "@/lib/utils"
 
 const initialState: ApplyState = { success: false, message: "" }
@@ -243,6 +244,7 @@ export function Apply() {
   const formRef = useRef<HTMLFormElement>(null)
   const [currentStep, setCurrentStep] = useState(1)
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({})
+  const { clearFormData } = useFormAutoSave(formRef)
   const allErrors = { ...(state.errors ?? {}), ...clientErrors }
 
   // Min character requirements for text fields
@@ -319,6 +321,7 @@ export function Apply() {
   useEffect(() => {
     if (state.success) {
       formRef.current?.reset()
+      clearFormData()
       setCurrentStep(1)
       setClientErrors({})
       scrollToTop()
