@@ -6,6 +6,7 @@ import { toast } from "sonner"
 
 interface Application {
   id: number
+  referralCode: string | null
   fullName: string
   email: string
   phone: string
@@ -99,6 +100,7 @@ export default function AdminPage() {
 
     const headers = [
       "ID",
+      "Referral Code",
       "Full Name",
       "Email",
       "Phone",
@@ -123,6 +125,7 @@ export default function AdminPage() {
 
     const rows = applications.map((app) => [
       app.id,
+      app.referralCode || "",
       app.fullName,
       app.email,
       app.phone,
@@ -173,6 +176,7 @@ export default function AdminPage() {
 
       const data = applications.map((app) => ({
         ID: app.id,
+        "Referral Code": app.referralCode,
         "Full Name": app.fullName,
         Email: app.email,
         Phone: app.phone,
@@ -301,6 +305,7 @@ export default function AdminPage() {
                 <thead className="border-b border-border bg-secondary/40">
                   <tr>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Name</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Referral Code</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Email</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">University</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Status</th>
@@ -312,6 +317,7 @@ export default function AdminPage() {
                   {applications.map((app) => (
                     <tr key={app.id} className="border-b border-border hover:bg-secondary/20 transition-colors">
                       <td className="px-6 py-4 text-sm font-medium text-foreground">{app.fullName}</td>
+                      <td className="px-6 py-4 text-sm font-mono font-semibold text-primary">{app.referralCode || "—"}</td>
                       <td className="px-6 py-4 text-sm text-muted-foreground">{app.email}</td>
                       <td className="px-6 py-4 text-sm text-muted-foreground">{app.university}</td>
                       <td className="px-6 py-4 text-sm">
@@ -372,6 +378,10 @@ export default function AdminPage() {
               <div>
                 <h3 className="font-semibold text-foreground mb-3">Personal Information</h3>
                 <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Referral Code</p>
+                    <p className="text-lg font-mono font-bold text-primary">{selectedApp.referralCode || "—"}</p>
+                  </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Email</p>
                     <p className="text-foreground">{selectedApp.email}</p>

@@ -2,6 +2,7 @@ import { pgTable, serial, text, timestamp } from "drizzle-orm/pg-core"
 
 export const ambassadorApplications = pgTable("ambassador_applications", {
   id: serial("id").primaryKey(),
+  referralCode: text("referral_code").unique(),
   // Section 1 — Personal & Academic
   fullName: text("full_name").notNull(),
   email: text("email").notNull(),
