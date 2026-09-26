@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db"
 import { ambassadorApplications } from "@/lib/db/schema"
+import { eq } from "drizzle-orm"
 
 export type ApplyState = {
   success: boolean
@@ -62,7 +63,7 @@ export async function submitApplication(
   }
 
   try {
-    await db.insert(ambassadorApplications).values({
+    const [application] = await db.insert(ambassadorApplications).values({
       fullName,
       email,
       phone,
@@ -93,7 +94,19 @@ export async function submitApplication(
       hearAbout: orNull(formData, "hearAbout"),
       referralName: orNull(formData, "referralName"),
       aiUsage: orNull(formData, "aiUsage"),
-    })
+    }).returning({ id: ambassadorApplications.id })
+
+    const initials = fullName
+      .split(/\s+/)
+      .map((part) => part.replace(/[^a-z]/gi, "").charAt(0).toUpperCase())
+      .filter(Boolean)
+      .join("") || "CA"
+    const referralCode = `${initials}${application.id}`
+
+    await db
+      .update(ambassadorApplications)
+      .set({ referralCode })
+      .where(eq(ambassadorApplications.id, application.id))
   } catch (err) {
     console.log("[v0] submitApplication error:", err)
     return { success: false, message: "Something went wrong. Please try again." }

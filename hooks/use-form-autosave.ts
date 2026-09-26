@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 
 const STORAGE_KEY = 'nexteca_application_draft'
 
-export function useFormAutoSave(formRef: React.RefObject<HTMLFormElement>) {
+export function useFormAutoSave(formRef: React.RefObject<HTMLFormElement | null>) {
   // Save form data to localStorage
   const saveFormData = () => {
     if (!formRef.current) return
